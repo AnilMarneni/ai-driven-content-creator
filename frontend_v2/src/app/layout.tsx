@@ -9,13 +9,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="bg-gray-50">
         <Navbar />
-        <div style={{ display: "flex" }}>
+        <div className="flex">
           <Sidebar />
-          <main style={{ padding: "16px", flex: 1 }}>
-            {children}
-          </main>
+          <main className="flex-1 p-6">{children}</main>
         </div>
       </body>
     </html>

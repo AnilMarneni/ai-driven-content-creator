@@ -1,9 +1,12 @@
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <h1 className="text-4xl font-bold">
-        AI Content Studio 🚀
+    <div className="max-w-xl mx-auto mt-16 text-center space-y-4">
+      <h1 className="text-3xl font-bold">
+        AI Content Studio
       </h1>
-    </main>
+      <p className="text-gray-600">
+        Generate professional content instantly using AI.
+      </p>
+    </div>
   );
 }
