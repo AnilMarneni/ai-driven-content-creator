@@ -1,21 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 export default function GeneratePage() {
+  const [contentType, setContentType] = useState("");
   const [topic, setTopic] = useState("");
-  const [contentType, setContentType] = useState("LinkedIn Post");
-  const [output, setOutput] = useState("");
+  const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleGenerate() {
+  const generateContent = async () => {
     setLoading(true);
     setError("");
-    setOutput("");
+    setResult("");
 
     try {
       const res = await fetch("http://127.0.0.1:8000/generate", {
@@ -30,60 +27,56 @@ export default function GeneratePage() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to generate content");
+        throw new Error("Request failed");
       }
 
       const data = await res.json();
-      setOutput(data.content);
+      setResult(data.content);
     } catch (err) {
-      setError("Something went wrong. Make sure the backend is running.");
+      setError("Failed to generate content");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <h1 className="text-3xl font-bold">✍️ Generate Content</h1>
+    <div className="max-w-2xl mx-auto mt-10 space-y-6">
+      <h1 className="text-2xl font-semibold">
+        Generate AI Content
+      </h1>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Input</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Input
-            placeholder="Topic (e.g. Why AI is important)"
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-          />
+      <div className="space-y-4">
+        <input
+          className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+          placeholder="Content type (blog, tweet, post)"
+          value={contentType}
+          onChange={(e) => setContentType(e.target.value)}
+        />
 
-          <Input
-            placeholder="Content Type (e.g. LinkedIn Post)"
-            value={contentType}
-            onChange={(e) => setContentType(e.target.value)}
-          />
+        <input
+          className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+          placeholder="Topic"
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+        />
 
-          <Button onClick={handleGenerate} disabled={loading}>
-            {loading ? "Generating..." : "Generate"}
-          </Button>
+        <button
+          onClick={generateContent}
+          disabled={loading}
+          className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 disabled:opacity-50"
+        >
+          {loading ? "Generating..." : "Generate"}
+        </button>
+      </div>
 
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
-          )}
-        </CardContent>
-      </Card>
+      {error && (
+        <p className="text-red-500">{error}</p>
+      )}
 
-      {output && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Generated Output</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <pre className="whitespace-pre-wrap text-sm">
-              {output}
-            </pre>
-          </CardContent>
-        </Card>
+      {result && (
+        <div className="border rounded-md p-4 bg-gray-50 whitespace-pre-wrap">
+          {result}
+        </div>
       )}
     </div>
   );
