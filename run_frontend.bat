@@ -1,5 +1,5 @@
 @echo off
-cd frontend_v2
+cd frontend
 echo Installing dependencies...
 call npm install
 echo Starting Frontend Server...

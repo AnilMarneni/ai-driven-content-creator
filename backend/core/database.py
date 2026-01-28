@@ -5,7 +5,10 @@ import hashlib
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 
-DB_NAME = "content_history.db"
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+DB_NAME = os.path.join(BASE_DIR, "backend", "data", "content_history.db")
 
 def get_db_connection():
     conn = sqlite3.connect(DB_NAME)

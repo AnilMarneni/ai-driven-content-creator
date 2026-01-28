@@ -7,7 +7,7 @@ An AI-powered content generation tool that helps create blog posts, tweets, Link
 - **backend/**: FastAPI backend service.
   - `api/`: API endpoints.
   - `core/`: Business logic and LLM integration.
-- **frontend_v2/**: Next.js frontend application.
+- **frontend/**: Next.js frontend application.
   - Modern UI with Tailwind CSS and Shadcn/UI.
 
 ## Prerequisites
