@@ -1,0 +1,61 @@
+from pydantic import BaseModel, Field
+from typing import Optional, List, Dict, Any
+
+class ContentRequest(BaseModel):
+    content_type: str = Field(..., example="LinkedIn Post")
+    topic: str = Field(..., min_length=3, example="The future of AI")
+    tone: str = Field(..., example="Professional")
+    target_audience: Optional[str] = Field("General Audience", example="Startup Founders")
+    content_length: str = Field("Medium", example="Short")  # Short, Medium, Long
+    keywords: Optional[str] = Field("", example="AI, growth, future") # Comma separated
+    formality: int = Field(3, ge=1, le=5, example=4)
+    include_emojis: bool = Field(True, example=True)
+
+class ContentResponse(BaseModel):
+    content: str
+    metrics: Optional[Dict[str, Any]] = None
+
+class HistoryItem(BaseModel):
+    id: int
+    content_type: str
+    topic: str
+    tone: str
+    target_audience: Optional[str]
+    content: str
+    timestamp: str
+
+class UserPreferences(BaseModel):
+    default_tone: Optional[str] = "Professional"
+    default_audience: Optional[str] = "General"
+    default_length: Optional[str] = "Medium"
+    industry: Optional[str] = None
+    writing_style: Optional[str] = None
+
+# --- Auth Schemas ---
+
+class UserCreate(BaseModel):
+    email: str = Field(..., example="user@example.com")
+    password: str = Field(..., min_length=6, example="secret123")
+    full_name: Optional[str] = Field("Creator", example="John Doe")
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    full_name: Optional[str]
+    avatar_url: Optional[str]
+    bio: Optional[str]
+    token: Optional[str] = None # Returned on login/register
+
+class ProfileUpdate(BaseModel):
+    full_name: Optional[str]
+    avatar_url: Optional[str]
+    bio: Optional[str]
+    email: Optional[str]
+
+
+
+

@@ -1,0 +1,3 @@
+@echo off
+echo Starting Backend Server...
+.\venv\Scripts\python.exe -m uvicorn backend.api.main:app --reload --port 8000

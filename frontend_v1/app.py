@@ -9,7 +9,7 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-from backend.content_engine import generate_content
+from backend.core.content_engine import generate_content
 from templates.content_templates import CONTENT_TEMPLATES
 
 # --------------------------------------------------
