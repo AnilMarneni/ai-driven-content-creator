@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any, Optional
-from backend.api.schemas import ContentRequest, ContentResponse, HistoryItem, UserPreferences, UserCreate, UserLogin, UserResponse, ProfileUpdate
+from backend.api.schemas import ContentRequest, ContentResponse, HistoryItem, UserPreferences, UserCreate, UserLogin, UserResponse, ProfileUpdate, ModelSchema
 from backend.core.content_engine import generate_content
 from backend.core.database import (
     init_db, save_generation, get_recent_generations, save_preferences, get_preferences,
@@ -39,7 +39,8 @@ app.add_middleware(
 )
 
 # ---------- Routes ----------
-
+from backend.api import batch_routes
+app.include_router(batch_routes.router)
 
 # ---------- Auth Routes ----------
 
@@ -96,6 +97,11 @@ def update_profile(updates: ProfileUpdate, user: Dict[str, Any] = Depends(get_cu
 @app.get("/")
 def health_check():
     return {"status": "LuminaAI API Running", "mode": "Premium"}
+
+@app.get("/models", response_model=List[ModelSchema])
+def get_models():
+    from backend.core.providers.registry import list_available_models
+    return [ModelSchema(**m.model_dump()) for m in list_available_models()]
 
 @app.get("/preferences", response_model=UserPreferences)
 def get_user_preferences():

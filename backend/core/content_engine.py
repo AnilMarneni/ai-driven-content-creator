@@ -9,7 +9,8 @@ def generate_content(
     content_length: str = "Medium", 
     keywords: str = "",
     formality: int = 3,
-    include_emojis: bool = True
+    include_emojis: bool = True,
+    model: str = None
 ) -> str:
     # Build dynamic prompt
     prompt = build_prompt(
@@ -24,6 +25,6 @@ def generate_content(
     )
     
     # Generate text using LLM
-    text = generate_text(prompt)
+    text = generate_text(prompt, model=model)
     
     return text

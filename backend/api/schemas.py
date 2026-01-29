@@ -10,6 +10,15 @@ class ContentRequest(BaseModel):
     keywords: Optional[str] = Field("", example="AI, growth, future") # Comma separated
     formality: int = Field(3, ge=1, le=5, example=4)
     include_emojis: bool = Field(True, example=True)
+    model: Optional[str] = Field(None, example="models/gemini-1.5-flash")
+
+class ModelSchema(BaseModel):
+    id: str
+    name: str
+    provider: str
+    description: str
+    cost_tier: str
+    capabilities: List[str]
 
 class ContentResponse(BaseModel):
     content: str
