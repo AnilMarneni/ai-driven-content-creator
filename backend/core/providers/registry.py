@@ -13,20 +13,20 @@ class ModelInfo(BaseModel):
 # Central Model Registry
 MODEL_REGISTRY: Dict[str, ModelInfo] = {
     # Google Models
-    "gemini-1.5-flash": ModelInfo(
-        id="models/gemini-1.5-flash",
-        name="Gemini 1.5 Flash",
+    "gemini-flash-latest": ModelInfo(
+        id="models/gemini-flash-latest",
+        name="Gemini Flash (Stable)",
         provider="google",
-        description="Fast, cost-effective, multimodal.",
+        description="Fast, reliable, free-tier friendly.",
         cost_tier="low",
         capabilities=["fast", "vision", "general"],
         context_window=1000000
     ),
-    "gemini-1.5-pro": ModelInfo(
-        id="models/gemini-1.5-pro",
-        name="Gemini 1.5 Pro",
+    "gemini-2.5-pro": ModelInfo(
+        id="models/gemini-2.5-pro",
+        name="Gemini 2.5 Pro",
         provider="google",
-        description="High intelligence, massive context.",
+        description="High intelligence, cutting edge.",
         cost_tier="medium",
         capabilities=["reasoning", "creative", "vision", "long-context"],
         context_window=2000000

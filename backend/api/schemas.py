@@ -11,6 +11,7 @@ class ContentRequest(BaseModel):
     formality: int = Field(3, ge=1, le=5, example=4)
     include_emojis: bool = Field(True, example=True)
     model: Optional[str] = Field(None, example="models/gemini-1.5-flash")
+    prompt_override: Optional[Dict[str, Any]] = Field(None, example={"template_id": "sys_linkedin"})
 
 class ModelSchema(BaseModel):
     id: str

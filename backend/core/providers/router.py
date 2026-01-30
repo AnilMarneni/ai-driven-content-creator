@@ -53,20 +53,20 @@ class ModelRouter:
         
         # Default to Google Gemini Flash if nothing specified
         if not selected_model_id:
-            selected_model_id = "models/gemini-1.5-flash"
+            selected_model_id = "models/gemini-flash-latest"
             
         model_info = get_model_info(selected_model_id)
         
         if not model_info:
             # Fallback to default if unknown model
             # print(f"Unknown model {model_id}, falling back.")
-            model_info = MODEL_REGISTRY.get("gemini-1.5-flash") # Fallback
+            model_info = MODEL_REGISTRY.get("gemini-flash-latest") # Fallback
             if not model_info: # Extreme fallback
                  # If registry is broken, try manual google
                  provider = self.get_provider("google")
                  if not provider:
                      raise ValueError("No providers available.")
-                 return provider.generate_text(prompt, model="models/gemini-1.5-flash", **kwargs)
+                 return provider.generate_text(prompt, model="models/gemini-flash-latest", **kwargs)
 
         provider_name = model_info.provider
         provider = self.get_provider(provider_name)
@@ -84,7 +84,7 @@ class ModelRouter:
                     # We might need to pick a default model for that provider
                     # For simplify, just let the provider pick its default or explicit
                     if p_name == "google":
-                         return fallback_provider.generate_text(prompt, model="models/gemini-1.5-flash", **kwargs)
+                         return fallback_provider.generate_text(prompt, model="models/gemini-flash-latest", **kwargs)
                     if p_name == "openai":
                          return fallback_provider.generate_text(prompt, model="gpt-4o-mini", **kwargs)
                     if p_name == "anthropic":

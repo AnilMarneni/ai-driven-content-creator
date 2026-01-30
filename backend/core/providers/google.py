@@ -36,10 +36,9 @@ class GoogleProvider(LLMProvider):
             # For now, let's just do what the original code did but wrapped here.
             
             priorities = [
-                "models/gemini-1.5-flash",
+                "models/gemini-flash-latest",
+                "models/gemini-2.0-flash-001",
                 "models/gemini-1.5-pro",
-                "models/gemini-1.0-pro",
-                "models/gemini-pro",
             ]
             
             try:
@@ -48,7 +47,7 @@ class GoogleProvider(LLMProvider):
                     if 'generateContent' in m.supported_generation_methods
                 ]
             except Exception:
-                return "models/gemini-1.5-flash" # Fallback if list fails
+                return "models/gemini-flash-latest" # Fallback if list fails
 
             for priority in priorities:
                 if priority in available_models:
@@ -60,11 +59,11 @@ class GoogleProvider(LLMProvider):
             if available_models:
                 return available_models[0]
                 
-            return "models/gemini-1.5-flash"
+            return "models/gemini-flash-latest"
 
         except Exception as e:
             print(f"Error determining best Google model: {e}")
-            return "models/gemini-1.5-flash"
+            return "models/gemini-flash-latest"
 
     def generate_text(self, prompt: str, **kwargs) -> str:
         if not self._available:

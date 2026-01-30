@@ -28,7 +28,8 @@ export default function GeneratePage() {
           keywords: data.keywords,
           formality: data.formality,
           include_emojis: data.includeEmojis,
-          model: data.model
+          model: data.model,
+          prompt_override: data.customPrompt ? { custom_template: data.customPrompt } : undefined
         }),
       });
 

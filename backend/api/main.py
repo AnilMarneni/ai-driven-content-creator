@@ -11,7 +11,7 @@ from backend.core.database import (
 app = FastAPI(
     title="LuminaAI API",
     description="Backend API for AI-driven content generation",
-    version="3.0.0"
+    version="3.0.3" # Force Reload for Stable models
 )
 
 # User Dependency
@@ -40,7 +40,10 @@ app.add_middleware(
 
 # ---------- Routes ----------
 from backend.api import batch_routes
+from backend.api.routes import prompts
 app.include_router(batch_routes.router)
+app.include_router(prompts.router)
+
 
 # ---------- Auth Routes ----------
 

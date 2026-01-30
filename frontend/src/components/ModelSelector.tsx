@@ -29,8 +29,10 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
                 if (res.ok) {
                     const data = await res.json();
                     setModels(data);
-                    // If selectedModel is empty, select first one
-                    if (!selectedModel && data.length > 0) {
+
+                    // Validation: IF selectedModel is empty OR not in the list, default to first available
+                    const isValid = data.some((m: Model) => m.id === selectedModel);
+                    if ((!selectedModel || !isValid) && data.length > 0) {
                         onSelect(data[0].id);
                     }
                 }
@@ -58,8 +60,8 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
                 ) : currentModel ? (
                     <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${currentModel.provider === 'google' ? 'bg-blue-50 text-blue-600' :
-                                currentModel.provider === 'openai' ? 'bg-green-50 text-green-600' :
-                                    'bg-purple-50 text-purple-600'
+                            currentModel.provider === 'openai' ? 'bg-green-50 text-green-600' :
+                                'bg-purple-50 text-purple-600'
                             }`}>
                             <Cpu className="w-5 h-5" />
                         </div>
@@ -90,8 +92,8 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
                                         }`}
                                 >
                                     <div className={`mt-1 w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 ${model.provider === 'google' ? 'bg-blue-100 text-blue-600' :
-                                            model.provider === 'openai' ? 'bg-green-100 text-green-600' :
-                                                'bg-purple-100 text-purple-600'
+                                        model.provider === 'openai' ? 'bg-green-100 text-green-600' :
+                                            'bg-purple-100 text-purple-600'
                                         }`}>
                                         {model.provider === 'google' && <Zap className="w-3.5 h-3.5" />}
                                         {model.provider === 'openai' && <Activity className="w-3.5 h-3.5" />}
