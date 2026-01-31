@@ -85,4 +85,8 @@ class GoogleProvider(LLMProvider):
                 
             return response.text.strip()
         except Exception as e:
-            raise ValueError(f"Google generation error ({model_name}): {str(e)}")
+            # Check for rate limit error string since strict type catching might vary by version
+            err_str = str(e)
+            if "429" in err_str or "quota" in err_str.lower():
+                 raise ValueError("Google API Quota Exceeded. Please wait a minute before trying again (Free Tier Limit).")
+            raise ValueError(f"Google generation error ({model_name}): {err_str}")

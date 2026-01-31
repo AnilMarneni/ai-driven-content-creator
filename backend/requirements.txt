@@ -7,3 +7,7 @@ anthropic
 pydantic
 requests
 colorlog
+textstat
+textblob
+python-multipart
+pandas

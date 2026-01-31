@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Copy, Check, FileText, Download, Edit3, Eye, SplitSquareHorizontal, RefreshCw } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { SmartEditor } from "../editor/SmartEditor";
 
 interface ContentCanvasProps {
@@ -104,8 +105,8 @@ export function ContentCanvas({ content, loading, metrics }: ContentCanvasProps)
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-                <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 min-h-[500px] p-8 md:p-12 relative">
+            <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+                <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 min-h-[calc(100vh-200px)] p-8 md:p-12 relative">
                     {activeTab === 'editor' && (
                         <SmartEditor
                             initialContent={displayContent}
@@ -116,8 +117,8 @@ export function ContentCanvas({ content, loading, metrics }: ContentCanvasProps)
                     )}
 
                     {activeTab === 'preview' && (
-                        <div className="prose prose-lg max-w-none text-gray-800">
-                            <ReactMarkdown>{displayContent}</ReactMarkdown>
+                        <div className="prose prose-lg max-w-none text-gray-800 prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-600 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 prose-strong:font-bold prose-ul:list-disc prose-ul:ml-4 prose-ol:list-decimal prose-ol:ml-4 prose-blockquote:border-l-4 prose-blockquote:border-primary/50 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-table:border-collapse prose-th:border-b prose-th:border-gray-200 prose-th:bg-gray-50 prose-th:p-2 prose-td:border-b prose-td:border-gray-100 prose-td:p-2">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{displayContent}</ReactMarkdown>
                         </div>
                     )}
 
@@ -126,7 +127,7 @@ export function ContentCanvas({ content, loading, metrics }: ContentCanvasProps)
                             <div className="border-r border-gray-100 pr-8">
                                 <h4 className="text-xs font-bold text-gray-400 uppercase mb-4">Markdown Source</h4>
                                 <textarea
-                                    className="w-full h-full text-sm font-mono text-gray-600 bg-gray-50 p-4 rounded-lg resize-none outline-none"
+                                    className="w-full h-full text-sm font-mono text-gray-600 bg-gray-50 p-4 rounded-lg resize-none outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                     value={displayContent}
                                     onChange={(e) => setDisplayContent(e.target.value)}
                                 // active sync enabled
@@ -134,8 +135,8 @@ export function ContentCanvas({ content, loading, metrics }: ContentCanvasProps)
                             </div>
                             <div>
                                 <h4 className="text-xs font-bold text-gray-400 uppercase mb-4">Live Preview</h4>
-                                <div className="prose prose-sm max-w-none">
-                                    <ReactMarkdown>{displayContent}</ReactMarkdown>
+                                <div className="prose prose-sm max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-600 prose-a:text-primary prose-strong:text-gray-900 prose-ul:list-disc prose-ol:list-decimal prose-blockquote:border-l-primary/50">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{displayContent}</ReactMarkdown>
                                 </div>
                             </div>
                         </div>
@@ -144,7 +145,7 @@ export function ContentCanvas({ content, loading, metrics }: ContentCanvasProps)
 
                 {/* Metrics Footnote */}
                 {metrics && (
-                    <div className="max-w-3xl mx-auto mt-6 grid grid-cols-3 gap-4">
+                    <div className="max-w-6xl mx-auto mt-6 grid grid-cols-3 gap-4">
                         <div className="p-4 bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col items-center">
                             <span className="text-2xl font-bold text-gray-900">{metrics.readability_score || "N/A"}</span>
                             <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Readability</span>
