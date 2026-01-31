@@ -59,12 +59,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const login = (token: string, userData: User) => {
         localStorage.setItem("token", token);
+        // Set cookie for Middleware (expires in 7 days)
+        document.cookie = `auth_token=${token}; path=/; max-age=604800; SameSite=Lax`;
         setUser(userData);
         router.push("/");
     };
 
     const logout = () => {
         localStorage.removeItem("token");
+        // Remove cookie
+        document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         setUser(null);
         router.push("/login"); // Redirect to login
     };

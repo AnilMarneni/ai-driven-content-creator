@@ -1,35 +1,51 @@
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional, Any
+from enum import Enum
 from datetime import datetime
+
+class BlockType(str, Enum):
+    SYSTEM = "system"
+    INSTRUCTION = "instruction"
+    CONTEXT = "context"
+    USER_INPUT = "user_input"
+
+class PromptBlock(BaseModel):
+    id: str
+    type: BlockType
+    content: str
+    is_locked: bool = False
+    description: Optional[str] = None
 
 class PromptVariable(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str
     default_value: Optional[str] = None
+    required: bool = True
 
 class PromptTemplate(BaseModel):
     id: str
     name: str
     description: str
-    template_text: str  # The actual prompt with {{variables}}
-    variables: List[str] # List of variable names expected
-    is_system: bool = False
-    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
-    category: Optional[str] = "General"
-    recommended_models: List[str] = Field(default_factory=list, description="List of model IDs that work best with this prompt")
-    avoid_models: List[str] = Field(default_factory=list, description="List of model IDs to avoid")
-    reason: Optional[str] = None # Reason for recommendations
-
+    version: str = "1.0.0"
+    author: str = "system"  # 'system' or user_id
+    
+    # The structured blocks
+    blocks: List[PromptBlock]
+    
+    # Variables expected in the blocks {{variable}}
+    variables: List[PromptVariable]
+    
+    # Metadata for UI/filtering
+    tags: List[str] = []
+    recommended_models: List[str] = ["models/gemini-flash-latest"]
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
 
 class PromptOverride(BaseModel):
-    template_id: Optional[str] = None
-    custom_template: Optional[str] = None
-    # If custom_template is provided, it attempts to use it directly (validated)
-    # If template_id is provided, it loads that template
-
-class ABTestRequest(BaseModel):
-    content_type: str
-    prompt_a_override: PromptOverride
-    prompt_b_override: PromptOverride
-    topic: str
-    params: Dict[str, Any] # Shared params like tone, audience
+    """
+    Used when a power user overrides specific editable blocks at runtime.
+    """
+    template_id: str
+    # Map of block_id -> new_content
+    # Only non-locked blocks can be keys here
+    block_overrides: Dict[str, str] = {} 

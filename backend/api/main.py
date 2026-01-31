@@ -7,6 +7,8 @@ from backend.core.database import (
     init_db, save_generation, get_recent_generations, save_preferences, get_preferences,
     create_user, get_user_by_email, create_session, get_session_user, get_user_by_id, hash_password, update_user
 )
+from backend.core.batch.manager import batch_manager
+from backend.core.batch.manager import batch_manager
 
 app = FastAPI(
     title="LuminaAI API",
@@ -40,9 +42,13 @@ app.add_middleware(
 
 # ---------- Routes ----------
 from backend.api import batch_routes
-from backend.api.routes import prompts
+# from backend.api.routes import prompts
+from backend.api.prompt_routes import router as prompt_router
+from backend.api.edit_routes import router as edit_router
 app.include_router(batch_routes.router)
-app.include_router(prompts.router)
+# app.include_router(prompts.router)
+app.include_router(prompt_router)
+app.include_router(edit_router)
 
 
 # ---------- Auth Routes ----------
@@ -145,6 +151,33 @@ async def generate(req: ContentRequest):
 @app.get("/history", response_model=List[HistoryItem])
 def get_history():
     try:
-        return get_recent_generations(limit=50)
+        # 1. DB Generations
+        generations = get_recent_generations(limit=50)
+        
+        # 2. Batch Jobs (In-Memory)
+        batch_jobs = batch_manager.get_all_jobs()
+        
+        # 3. Format Batch Jobs to match HistoryItem schema (roughly)
+        # HistoryItem: id, content_type, topic, tone, target_audience, content, timestamp
+        batch_history = []
+        for job in batch_jobs:
+            # We use job ID as ID (string vs int might be issue, frontend should handle)
+            # We prefix ID to avoid collision or just let it be
+            batch_history.append({
+                "id": job["id"], # String
+                "content_type": "Batch Job",
+                "topic": job["filename"],
+                "tone": "Various",
+                "target_audience": "Various",
+                "content": f"Batch Job: {job['filename']} ({job['completed_items']}/{job['total_items']} items). Status: {job['status']}",
+                "timestamp": job["created_at"]
+            })
+            
+        # 4. Merge and Sort
+        combined = generations + batch_history
+        # Sort by timestamp desc
+        combined.sort(key=lambda x: str(x["timestamp"]), reverse=True)
+        
+        return combined[:50]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

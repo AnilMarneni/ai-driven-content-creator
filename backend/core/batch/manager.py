@@ -9,8 +9,29 @@ from typing import List, Dict, Any, Optional
 from backend.core.content_engine import generate_content
 from backend.core.provider_limits import get_provider_limits
 
+import json
+import os
+
 # Job Store
 BATCH_JOBS: Dict[str, Any] = {}
+DATA_FILE = os.path.join(os.path.dirname(__file__), "batch_store.json")
+
+def save_jobs_to_disk():
+    try:
+        with open(DATA_FILE, 'w') as f:
+            # Convert non-serializable objects if any? currently all simple types
+            json.dump(BATCH_JOBS, f)
+    except Exception as e:
+        print(f"Failed to save batch jobs: {e}")
+
+def load_jobs_from_disk():
+    global BATCH_JOBS
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, 'r') as f:
+                BATCH_JOBS = json.load(f)
+        except Exception as e:
+            print(f"Failed to load batch jobs: {e}")
 
 class BatchWorker(threading.Thread):
     def __init__(self, job_queue: queue.PriorityQueue):
@@ -98,10 +119,13 @@ class BatchWorker(threading.Thread):
         job["completed_items"] += 1
         if job["completed_items"] >= job["total_items"]:
             job["status"] = "completed"
+        
+        save_jobs_to_disk()
 
 
 class BatchManager:
     def __init__(self):
+        load_jobs_from_disk()
         self.queue = queue.PriorityQueue()
         # Start a few workers (concurrency is handled by rate limits mostly)
         self.workers = []
@@ -147,6 +171,8 @@ class BatchManager:
             "items": items,
             "settings": settings
         }
+        
+        save_jobs_to_disk()
 
         # Enqueue items
         # Priority 1 (High) for now, using timestamp as FIFO tie breaker

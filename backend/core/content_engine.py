@@ -16,8 +16,7 @@ def generate_content(
     # 1. Check for overrides
     if prompt_override:
         # Import here to avoid circular dependencies if any
-        from backend.core.prompts.manager import prompt_manager
-        from backend.core.prompts.schemas import PromptOverride
+        from backend.core.prompts.engine import prompt_engine
         
         # Prepare params for substitution
         context_params = {
@@ -30,10 +29,24 @@ def generate_content(
             "include_emojis": include_emojis
         }
         
-        # Resolve prompt
-        override_obj = PromptOverride(**prompt_override)
-        prompt = prompt_manager.resolve_prompt(override_obj, context_params)
-        
+        # Check for legacy simple override or structured
+        if "custom_template" in prompt_override:
+             # Legacy/Simple override (just a string)
+             prompt = prompt_override["custom_template"]
+             # Perform some basic variable substitution manually if needed, or assume raw
+             for k, v in context_params.items():
+                 prompt = prompt.replace(f"{{{{{k}}}}}", str(v))
+        else:
+            # Structured Override
+            t_id = prompt_override.get("template_id")
+            b_ovr = prompt_override.get("block_overrides", {})
+            
+            if t_id:
+                prompt = prompt_engine.resolve_prompt(t_id, context_params, b_ovr)
+            else:
+                # Fallback
+                prompt = build_prompt(**context_params)
+
     else:
         # 2. Build dynamic prompt (Standard Flow)
         prompt = build_prompt(

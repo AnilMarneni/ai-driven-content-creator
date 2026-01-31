@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Copy, Check, FileText, Download, Edit3, Eye, SplitSquareHorizontal, RefreshCw } from "lucide-react";
-import ReactMarkdown from 'react-markdown'; // Assuming we can use this, otherwise standard pre text
+import ReactMarkdown from 'react-markdown';
+import { SmartEditor } from "../editor/SmartEditor";
 
 interface ContentCanvasProps {
     content: string;
@@ -12,10 +13,16 @@ interface ContentCanvasProps {
 
 export function ContentCanvas({ content, loading, metrics }: ContentCanvasProps) {
     const [activeTab, setActiveTab] = useState<'editor' | 'preview' | 'split'>('editor');
+    const [displayContent, setDisplayContent] = useState(content);
     const [copied, setCopied] = useState(false);
 
+    // Sync content prop changes
+    useEffect(() => {
+        setDisplayContent(content);
+    }, [content]);
+
     const handleCopy = () => {
-        navigator.clipboard.writeText(content);
+        navigator.clipboard.writeText(displayContent);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -100,18 +107,17 @@ export function ContentCanvas({ content, loading, metrics }: ContentCanvasProps)
             <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                 <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 min-h-[500px] p-8 md:p-12 relative">
                     {activeTab === 'editor' && (
-                        <textarea
-                            className="w-full h-full min-h-[500px] resize-none outline-none text-gray-800 leading-relaxed font-serif text-lg bg-transparent"
-                            value={content}
-                            readOnly // For now
+                        <SmartEditor
+                            initialContent={displayContent}
+                            onUpdate={(newContent) => {
+                                setDisplayContent(newContent);
+                            }}
                         />
                     )}
 
                     {activeTab === 'preview' && (
                         <div className="prose prose-lg max-w-none text-gray-800">
-                            {content.split('\n').map((line, i) => (
-                                <p key={i}>{line}</p>
-                            ))}
+                            <ReactMarkdown>{displayContent}</ReactMarkdown>
                         </div>
                     )}
 
@@ -121,16 +127,15 @@ export function ContentCanvas({ content, loading, metrics }: ContentCanvasProps)
                                 <h4 className="text-xs font-bold text-gray-400 uppercase mb-4">Markdown Source</h4>
                                 <textarea
                                     className="w-full h-full text-sm font-mono text-gray-600 bg-gray-50 p-4 rounded-lg resize-none outline-none"
-                                    value={content}
-                                    readOnly
+                                    value={displayContent}
+                                    onChange={(e) => setDisplayContent(e.target.value)}
+                                // active sync enabled
                                 />
                             </div>
                             <div>
                                 <h4 className="text-xs font-bold text-gray-400 uppercase mb-4">Live Preview</h4>
                                 <div className="prose prose-sm max-w-none">
-                                    {content.split('\n').map((line, i) => (
-                                        <p key={i}>{line}</p>
-                                    ))}
+                                    <ReactMarkdown>{displayContent}</ReactMarkdown>
                                 </div>
                             </div>
                         </div>

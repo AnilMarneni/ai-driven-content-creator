@@ -1,79 +1,71 @@
-from .schemas import PromptTemplate
-import uuid
+from .schemas import PromptTemplate, PromptBlock, PromptVariable, BlockType
 
-# Standard System Templates
-SYSTEM_TEMPLATES = [
-    PromptTemplate(
-        id="sys_linkedin_default",
-        name="LinkedIn Standard",
-        description="Professional LinkedIn post with engagement hooks.",
-        category="LinkedIn Post",
-        is_system=True,
-        variables=["topic", "tone", "target_audience", "keywords", "content_length", "include_emojis"],
-        template_text="""
-You are an expert LinkedIn ghostwriter.
-Create a LinkedIn post about {{topic}}.
+LINKEDIN_AUTHORITY = PromptTemplate(
+    id="linkedin-authority-v1",
+    name="LinkedIn Authority Builder",
+    description="Creates high-engagement, thought-leadership style posts optimized for the LinkedIn algorithm.",
+    tags=["Social Media", "LinkedIn", "Thought Leadership"],
+    variables=[
+        PromptVariable(name="topic", description="The main subject of the post"),
+        PromptVariable(name="audience", description="Target reader persona", default_value="Professionals"),
+        PromptVariable(name="tone", description="Voice of the post", default_value="Professional but Authentic")
+    ],
+    blocks=[
+        PromptBlock(
+            id="system_core",
+            type=BlockType.SYSTEM,
+            content="You are a LinkedIn Influencer and Copywriting Expert. Your goal is to write posts that drive engagement, comments, and shares. Use short paragraphs, clear hooks, and a conversational yet professional tone.",
+            is_locked=True,
+            description="Core system persona (Locked)"
+        ),
+        PromptBlock(
+            id="instruction_hook",
+            type=BlockType.INSTRUCTION,
+            content="Write a catchy 'hook' (first 2 lines) about {{topic}} that stops the scroll. It should challenge a common belief or state a surprising fact.",
+            is_locked=False,
+            description="The opening hook strategy"
+        ),
+        PromptBlock(
+            id="instruction_body",
+            type=BlockType.INSTRUCTION,
+            content="Expand on the {{topic}} for {{audience}}. \n- Use a 'Problem-Agitation-Solution' structure.\n- Include personal insight or 'I' statements to build authenticity.\n- Keep sentences under 20 words where possible.\n- Tone: {{tone}}.",
+            is_locked=False,
+            description="Main body instructions"
+        ),
+        PromptBlock(
+            id="instruction_cta",
+            type=BlockType.INSTRUCTION,
+            content="End with a question to {{audience}} that encourages comments. Do not use generic CTAs like 'Thoughts?'. Be specific.",
+            is_locked=False,
+            description="Call to Action logic"
+        )
+    ]
+)
 
-Context:
-- Tone: {{tone}}
-- Target Audience: {{target_audience}}
-- Content Length: {{content_length}}
-- Keywords to include: {{keywords}}
-- Use Emojis: {{include_emojis}}
+BLOG_POST_SEO = PromptTemplate(
+    id="blog-seo-v1",
+    name="SEO Optimized Blog Post",
+    description="Writes a structured, keyword-rich blog post designed to rank.",
+    tags=["Blog", "SEO", "Long-form"],
+    variables=[
+        PromptVariable(name="topic", description="Blog Title/Topic"),
+        PromptVariable(name="keywords", description="Comma-separated keywords", default_value="industry trends"),
+        PromptVariable(name="tone", description="Writing tone", default_value="Informative")
+    ],
+    blocks=[
+        PromptBlock(
+            id="system_core",
+            type=BlockType.SYSTEM,
+            content="You are an SEO Content Writer. You write comprehensive, easy-to-read articles that Google loves.",
+            is_locked=True
+        ),
+        PromptBlock(
+            id="instruction_structure",
+            type=BlockType.INSTRUCTION,
+            content="Write a blog post about '{{topic}}'.\nInclude a Tantalizing Title (H1).\nUse H2s and H3s for structure.\nIntegrate these keywords naturally: {{keywords}}.\nTone: {{tone}}.",
+            is_locked=False
+        )
+    ]
+)
 
-Instructions:
-1. Start with a strong hook (question or bold statement).
-2. Provide value or insight in the middle paragraph.
-3. End with a call to action (question for the audience).
-4. Use formatting (bullet points) for readability.
-"""
-    ),
-    PromptTemplate(
-        id="sys_blog_educational",
-        name="Educational Blog Post",
-        description="Structured blog post for teaching a concept.",
-        category="Blog Post",
-        is_system=True,
-        variables=["topic", "tone", "target_audience", "keywords"],
-        template_text="""
-Write an educational blog post about {{topic}}.
-
-Target Audience: {{target_audience}}
-Tone: {{tone}}
-
-Structure:
-1. Introduction: Hook and definition of the topic.
-2. Why it matters: Explain the importance.
-3. Key Concepts: 3 subheadings explaining core details.
-4. Practical Tips: Bullet points on how to apply this.
-5. Conclusion: Summary and final thought.
-
-Ensure the content is SEO-friendly and uses the keywords: {{keywords}}.
-"""
-    ),
-    PromptTemplate(
-        id="sys_sales_email",
-        name="Cold Sales Email",
-        description="Persuasive cold email based on AIDA framework.",
-        category="Email",
-        is_system=True,
-        variables=["topic", "tone", "target_audience"],
-        template_text="""
-Write a cold sales email about {{topic}}.
-
-Audience: {{target_audience}}
-Tone: {{tone}}
-
-Use the AIDA framework:
-- Attention: Grab their attention in the subject line and first sentence.
-- Interest: Pique interest with a statistic or relevant problem.
-- Desire: Show how our solution (related to {{topic}}) solves it.
-- Action: specific call to action (book a call).
-
-Keep it concise and conversational.
-"""
-    )
-]
-
-def get_default_templates():
-    return SYSTEM_TEMPLATES
+DEFAULT_TEMPLATES = [LINKEDIN_AUTHORITY, BLOG_POST_SEO]

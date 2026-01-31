@@ -1,30 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sparkles, Settings2, ChevronDown, ChevronRight, Sliders, Type, Users, Mic, Hash, LayoutTemplate, Zap } from "lucide-react";
+import { Sparkles, Settings2, ChevronDown, ChevronRight, Sliders, Type, Users, Mic, Hash, LayoutTemplate, Zap, FileCode } from "lucide-react";
 import { ModelSelector } from "@/components/ModelSelector";
 import { BatchUploader } from "./BatchUploader";
-import { PromptEditor } from "../advanced/PromptEditor";
-
-const DEFAULT_PROMPT_TEMPLATE = `
-You are an expert content creator.
-Write a {{contentType}} about {{topic}}.
-
-Context:
-- Tone: {{tone}}
-- Audience: {{audience}}
-
-Instructions:
-Write engaging, high-quality content that resonates with the audience.
-`;
+import { useAdvancedMode } from "@/context/AdvancedModeContext";
+import { ModeToggle } from "../advanced/ModeToggle";
 
 interface InputDeckProps {
     onGenerate: (data: any) => void;
     loading: boolean;
     defaults?: any;
+    onViewChange: (view: 'canvas' | 'studio') => void;
+    currentView: 'canvas' | 'studio';
 }
 
-export function InputDeck({ onGenerate, loading, defaults }: InputDeckProps) {
+export function InputDeck({ onGenerate, loading, defaults, onViewChange, currentView }: InputDeckProps) {
+    const { isAdvancedMode } = useAdvancedMode();
     const [mode, setMode] = useState<'single' | 'batch'>('single');
     const [formData, setFormData] = useState({
         contentType: "Blog",
@@ -39,8 +31,6 @@ export function InputDeck({ onGenerate, loading, defaults }: InputDeckProps) {
     });
 
     const [showAdvanced, setShowAdvanced] = useState(false);
-    const [showAdvancedMode, setShowAdvancedMode] = useState(false);
-    const [promptTemplate, setPromptTemplate] = useState(DEFAULT_PROMPT_TEMPLATE);
 
     useEffect(() => {
         if (defaults) {
@@ -174,15 +164,11 @@ export function InputDeck({ onGenerate, loading, defaults }: InputDeckProps) {
                                     </button>
                                 ))}
                             </div>
-                            {/* Fallback for others */}
-                            {!['Professional', 'Casual', 'Witty'].includes(formData.tone) && (
-                                <div className="mt-2 text-xs text-violet-600 font-bold px-2">Selected: {formData.tone}</div>
-                            )}
                         </div>
                     </div>
                 </section>
 
-                {/* 4. Fine Tuning (Progressive Disclosure) */}
+                {/* 4. Fine Tuning */}
                 <section>
                     <button
                         onClick={() => setShowAdvanced(!showAdvanced)}
@@ -197,7 +183,6 @@ export function InputDeck({ onGenerate, loading, defaults }: InputDeckProps) {
 
                     {showAdvanced && (
                         <div className="pt-4 space-y-4 animate-slide-up">
-
                             {/* Keywords */}
                             <div>
                                 <label className="text-xs font-medium text-gray-500 mb-1.5 flex items-center gap-1"><Hash className="w-3 h-3" /> Keywords</label>
@@ -235,56 +220,27 @@ export function InputDeck({ onGenerate, loading, defaults }: InputDeckProps) {
                                     />
                                 </div>
                             </div>
-
-                            {/* Emojis toggle */}
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    id="deck-emojis"
-                                    name="includeEmojis"
-                                    checked={formData.includeEmojis}
-                                    onChange={handleChange}
-                                    className="w-4 h-4 rounded text-primary focus:ring-primary"
-                                />
-                                <label htmlFor="deck-emojis" className="text-xs font-bold text-gray-600 cursor-pointer select-none">Include Emojis</label>
-                            </div>
-
                         </div>
                     )}
                 </section>
 
-                {/* 5. Advanced Engineering (Opt-in) */}
-                <section className="pt-4 border-t border-gray-100">
-                    <div className="flex items-center justify-between mb-4">
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
-                            <Zap className={`w-3 h-3 ${showAdvancedMode ? 'text-amber-500' : 'text-gray-400'}`} />
-                            Advanced Mode
-                        </label>
-                        <div
-                            onClick={() => setShowAdvancedMode(!showAdvancedMode)}
-                            className={`w-10 h-5 rounded-full p-1 cursor-pointer transition-colors relative ${showAdvancedMode ? 'bg-amber-500' : 'bg-gray-200'}`}
+                {/* 5. Advanced Configuration (Milestone 3.3) */}
+                <section className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                    <ModeToggle />
+
+                    {isAdvancedMode && (
+                        <button
+                            onClick={() => onViewChange(currentView === 'studio' ? 'canvas' : 'studio')}
+                            className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg border transition-all flex items-center gap-2 ${currentView === 'studio'
+                                    ? 'bg-violet-600 text-white border-violet-600'
+                                    : 'bg-white text-violet-600 border-violet-200 hover:bg-violet-50'
+                                }`}
                         >
-                            <div className={`w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${showAdvancedMode ? 'translate-x-5' : 'translate-x-0'}`} />
-                        </div>
-                    </div>
-
-                    {showAdvancedMode && (
-                        <div className="animate-fade-in space-y-4">
-                            <div className="bg-amber-50 border border-amber-100 p-3 rounded-lg text-[11px] text-amber-800 leading-relaxed">
-                                <strong>Power User Zone:</strong> You are overriding the default AI prompt logic.
-                                Ensure you include sufficient context variables.
-                            </div>
-
-                            <PromptEditor
-                                template={promptTemplate}
-                                variables={['topic', 'tone', 'audience']}
-                                onChange={(val) => setFormData(prev => ({ ...prev, customPrompt: val }))}
-                                onReset={() => setPromptTemplate(DEFAULT_PROMPT_TEMPLATE)}
-                            />
-                        </div>
+                            <FileCode className="w-3 h-3" />
+                            {currentView === 'studio' ? 'Close Studio' : 'Prompt Studio'}
+                        </button>
                     )}
                 </section>
-
 
             </div>
 

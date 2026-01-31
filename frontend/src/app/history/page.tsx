@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { History, Search, FileText, Calendar, ArrowRight, Zap, Copy, Check } from "lucide-react";
+import { History, Search, FileText, Calendar, ArrowRight, Zap, Copy, Check, Layers } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 
@@ -76,9 +76,26 @@ export default function HistoryPage() {
             {/* Content */}
             <main className="flex-1 max-w-5xl mx-auto w-full p-6">
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-20 gap-4">
-                        <Zap className="w-8 h-8 text-gray-300 animate-bounce" />
-                        <p className="text-gray-400 font-medium">Loading history...</p>
+                    <div className="space-y-4">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm animate-pulse">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="space-y-2 w-2/3">
+                                        <div className="h-6 bg-gray-100 rounded w-3/4" />
+                                        <div className="flex gap-2">
+                                            <div className="h-4 bg-gray-100 rounded w-20" />
+                                            <div className="h-4 bg-gray-100 rounded w-32" />
+                                        </div>
+                                    </div>
+                                    <div className="h-6 bg-gray-100 rounded w-16" />
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="h-4 bg-gray-100 rounded w-full" />
+                                    <div className="h-4 bg-gray-100 rounded w-full" />
+                                    <div className="h-4 bg-gray-100 rounded w-2/3" />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ) : filteredHistory.length === 0 ? (
                     <div className="text-center py-20">
@@ -98,11 +115,12 @@ export default function HistoryPage() {
                                 {/* Card Header */}
                                 <div className="px-5 py-4 border-b border-gray-50 flex items-start justify-between bg-white">
                                     <div className="flex items-start gap-4">
-                                        <div className={`mt-1 p-2 rounded-lg ${item.content_type === 'Blog' ? 'bg-blue-50 text-blue-600' :
+                                        <div className={`mt-1 p-2 rounded-lg ${item.content_type === 'Batch Job' ? 'bg-indigo-50 text-indigo-600' :
+                                            item.content_type === 'Blog' ? 'bg-blue-50 text-blue-600' :
                                                 item.content_type === 'LinkedIn Post' ? 'bg-blue-50 text-sky-700' :
                                                     'bg-purple-50 text-purple-600'
                                             }`}>
-                                            <FileText className="w-5 h-5" />
+                                            {item.content_type === 'Batch Job' ? <Layers className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
                                         </div>
                                         <div>
                                             <h3 className="font-bold text-gray-800 text-lg leading-tight mb-1">{item.topic || "Untitled"}</h3>
