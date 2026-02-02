@@ -41,14 +41,12 @@ app.add_middleware(
 )
 
 # ---------- Routes ----------
-from backend.api import batch_routes
-# from backend.api.routes import prompts
-from backend.api.prompt_routes import router as prompt_router
-from backend.api.edit_routes import router as edit_router
-app.include_router(batch_routes.router)
-# app.include_router(prompts.router)
-app.include_router(prompt_router)
-app.include_router(edit_router)
+# ---------- Routes ----------
+from backend.api.routes import batch, prompts, edit
+
+app.include_router(batch.router)
+app.include_router(prompts.router)
+app.include_router(edit.router)
 
 
 # ---------- Auth Routes ----------
