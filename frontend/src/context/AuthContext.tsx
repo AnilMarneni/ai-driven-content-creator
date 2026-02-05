@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const token = localStorage.getItem("token");
             if (token) {
                 try {
-                    const res = await fetch("http://localhost:8000/auth/me", {
+                    const res = await fetch("http://127.0.0.1:8000/auth/me", {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                     if (res.ok) {

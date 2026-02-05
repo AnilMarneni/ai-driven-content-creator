@@ -38,7 +38,7 @@ export default function SettingsPage() {
         }
 
         // Load preferences
-        fetch("http://localhost:8000/preferences")
+        fetch("http://127.0.0.1:8000/preferences")
             .then(res => res.json())
             .then(data => setFormData(prev => ({ ...prev, ...data })))
             .catch(err => console.error("Failed to load settings", err));
@@ -54,7 +54,7 @@ export default function SettingsPage() {
 
         try {
             // 1. Update Profile (Auth)
-            const profileRes = await fetch("http://localhost:8000/auth/me", {
+            const profileRes = await fetch("http://127.0.0.1:8000/auth/me", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -72,7 +72,7 @@ export default function SettingsPage() {
             updateProfile(updatedUser);
 
             // 2. Update Preferences
-            const prefRes = await fetch("http://localhost:8000/preferences", {
+            const prefRes = await fetch("http://127.0.0.1:8000/preferences", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

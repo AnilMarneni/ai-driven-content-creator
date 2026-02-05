@@ -10,9 +10,12 @@ interface ContentCanvasProps {
     content: string;
     loading: boolean;
     metrics?: any;
+    isAB?: boolean;
+    contentB?: string;
+    metricsB?: any;
 }
 
-export function ContentCanvas({ content, loading, metrics }: ContentCanvasProps) {
+export function ContentCanvas({ content, loading, metrics, isAB, contentB, metricsB }: ContentCanvasProps) {
     const [activeTab, setActiveTab] = useState<'editor' | 'preview' | 'split'>('editor');
     const [displayContent, setDisplayContent] = useState(content);
     const [copied, setCopied] = useState(false);
@@ -27,6 +30,43 @@ export function ContentCanvas({ content, loading, metrics }: ContentCanvasProps)
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
+
+
+
+    // A/B Comparison View
+    if (isAB && !loading && (content || contentB)) {
+        return (
+            <div className="h-full flex flex-col bg-gray-50/30 overflow-hidden">
+                <div className="h-14 border-b border-gray-200 bg-white px-6 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-violet-600 font-bold text-sm uppercase tracking-wide">
+                        <SplitSquareHorizontal className="w-4 h-4" /> A/B Comparison
+                    </div>
+                </div>
+                <div className="flex-1 grid grid-cols-2 divide-x divide-gray-200 overflow-hidden">
+                    {/* Variant A */}
+                    <div className="flex flex-col overflow-hidden bg-white">
+                        <div className="p-3 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
+                            <span className="text-xs font-bold text-gray-500">Variant A</span>
+                            {metrics && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-mono">{metrics.readability_score} Score</span>}
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 prose prose-sm max-w-none">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                        </div>
+                    </div>
+                    {/* Variant B */}
+                    <div className="flex flex-col overflow-hidden bg-white">
+                        <div className="p-3 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
+                            <span className="text-xs font-bold text-gray-500">Variant B</span>
+                            {metricsB && <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-mono">{metricsB.readability_score} Score</span>}
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 prose prose-sm max-w-none">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentB || "*Waiting for content...*"}</ReactMarkdown>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     // Empty State
     if (!content && !loading) {

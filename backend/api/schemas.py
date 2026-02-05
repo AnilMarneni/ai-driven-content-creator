@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 
 class ContentRequest(BaseModel):
     content_type: str = Field(..., example="LinkedIn Post")
@@ -26,7 +26,7 @@ class ContentResponse(BaseModel):
     metrics: Optional[Dict[str, Any]] = None
 
 class HistoryItem(BaseModel):
-    id: int
+    id: Union[int, str]
     content_type: str
     topic: str
     tone: str
@@ -69,3 +69,11 @@ class ProfileUpdate(BaseModel):
 
 
 
+
+class ABContentRequest(BaseModel):
+    variant_a: ContentRequest
+    variant_b: ContentRequest
+
+class ABContentResponse(BaseModel):
+    result_a: ContentResponse
+    result_b: ContentResponse

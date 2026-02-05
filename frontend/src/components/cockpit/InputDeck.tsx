@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sparkles, Settings2, ChevronDown, ChevronRight, Sliders, Type, Users, Mic, Hash, LayoutTemplate, Zap, FileCode } from "lucide-react";
+import { Sparkles, Settings2, ChevronDown, ChevronRight, Sliders, Type, Users, Mic, Hash, LayoutTemplate, Zap, FileCode, SplitSquareHorizontal } from "lucide-react";
 import { ModelSelector } from "@/components/ModelSelector";
-import { BatchUploader } from "./BatchUploader";
+
 import { useAdvancedMode } from "@/context/AdvancedModeContext";
 import { ModeToggle } from "../advanced/ModeToggle";
 
@@ -13,11 +13,12 @@ interface InputDeckProps {
     defaults?: any;
     onViewChange: (view: 'canvas' | 'studio') => void;
     currentView: 'canvas' | 'studio';
+    onSwitchMode: (mode: 'single' | 'batch') => void;
 }
 
-export function InputDeck({ onGenerate, loading, defaults, onViewChange, currentView }: InputDeckProps) {
+export function InputDeck({ onGenerate, loading, defaults, onViewChange, currentView, onSwitchMode }: InputDeckProps) {
     const { isAdvancedMode } = useAdvancedMode();
-    const [mode, setMode] = useState<'single' | 'batch'>('single');
+    // const [mode, setMode] = useState<'single' | 'batch'>('single'); // Lifted up
     const [formData, setFormData] = useState({
         contentType: "Blog",
         topic: "",
@@ -29,6 +30,13 @@ export function InputDeck({ onGenerate, loading, defaults, onViewChange, current
         includeEmojis: true,
         model: ""
     });
+
+    const [isABMode, setIsABMode] = useState(false);
+    const [formDataB, setFormDataB] = useState({ ...formData }); // Init with same defaults
+
+    // Sync B with A changes unless explicitly modified (simple sync for now, or just init)
+    // Actually simpler to just let B diverge.
+
 
     const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -51,19 +59,7 @@ export function InputDeck({ onGenerate, loading, defaults, onViewChange, current
         setFormData(prev => ({ ...prev, formality: parseInt(e.target.value) }));
     };
 
-    if (mode === 'batch') {
-        return (
-            <div className="h-full flex flex-col bg-white border-r border-gray-200 shadow z-20">
-                <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                    <button onClick={() => setMode('single')} className="text-xs font-bold text-gray-500 hover:text-primary flex items-center gap-1 transition-colors">
-                        <ChevronDown className="w-4 h-4 rotate-90" /> Back to Single
-                    </button>
-                    <span className="text-xs font-bold uppercase text-primary tracking-wide">Batch Studio</span>
-                </div>
-                <BatchUploader />
-            </div>
-        );
-    }
+
 
     return (
         <div className="h-full flex flex-col bg-white border-r border-gray-200 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] z-20">
@@ -76,7 +72,7 @@ export function InputDeck({ onGenerate, loading, defaults, onViewChange, current
                 </h2>
 
                 <button
-                    onClick={() => setMode('batch')}
+                    onClick={() => onSwitchMode('batch')}
                     className="text-[10px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition-colors tracking-wide border border-gray-200/50"
                 >
                     SWITCH TO BATCH
@@ -232,8 +228,8 @@ export function InputDeck({ onGenerate, loading, defaults, onViewChange, current
                         <button
                             onClick={() => onViewChange(currentView === 'studio' ? 'canvas' : 'studio')}
                             className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg border transition-all flex items-center gap-2 ${currentView === 'studio'
-                                    ? 'bg-violet-600 text-white border-violet-600'
-                                    : 'bg-white text-violet-600 border-violet-200 hover:bg-violet-50'
+                                ? 'bg-violet-600 text-white border-violet-600'
+                                : 'bg-white text-violet-600 border-violet-200 hover:bg-violet-50'
                                 }`}
                         >
                             <FileCode className="w-3 h-3" />
@@ -242,17 +238,72 @@ export function InputDeck({ onGenerate, loading, defaults, onViewChange, current
                     )}
                 </section>
 
+                {/* 6. A/B Testing Toggle */}
+                <section className="pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between mb-2">
+                        <label className="text-xs font-bold text-gray-600 flex items-center gap-2">
+                            <SplitSquareHorizontal className="w-4 h-4 text-violet-600" />
+                            A/B Testing Mode
+                        </label>
+                        <div
+                            onClick={() => {
+                                const newMode = !isABMode;
+                                setIsABMode(newMode);
+                                if (!newMode) {
+                                    setFormDataB(formData); // Reset B to match A when turning off
+                                }
+                            }}
+                            className={`w-10 h-5 rounded-full flex items-center p-1 cursor-pointer transition-colors ${isABMode ? 'bg-violet-600' : 'bg-gray-300'}`}
+                        >
+                            <div className={`w-3 h-3 rounded-full bg-white shadow-sm transform transition-transform ${isABMode ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </div>
+                    </div>
+
+                    {isABMode && (
+                        <div className="bg-violet-50/50 p-3 rounded-xl border border-violet-100 space-y-3 animate-in fade-in slide-in-from-top-2">
+                            <p className="text-[10px] text-violet-600 font-medium">Configure Variant B (Variant A uses settings above)</p>
+
+                            {/* Simplified Variant B Controls - limiting to Model & Tone for V1 */}
+                            <div>
+                                <label className="text-[10px] font-bold text-gray-500 mb-1 block">Variant B Model</label>
+                                <ModelSelector
+                                    selectedModel={formDataB.model || formData.model}
+                                    onSelect={(id) => setFormDataB(prev => ({ ...prev, model: id }))}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] font-bold text-gray-500 mb-1 block">Variant B Tone</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {['Professional', 'Casual', 'Witty', 'Persuasive'].map((t) => (
+                                        <button
+                                            key={t}
+                                            onClick={() => setFormDataB(prev => ({ ...prev, tone: t }))}
+                                            className={`px-2 py-1.5 text-[10px] font-bold rounded-lg border transition-all ${formDataB.tone === t
+                                                ? 'bg-violet-100 border-violet-300 text-violet-800'
+                                                : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'
+                                                }`}
+                                        >
+                                            {t}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </section>
+
             </div>
 
             {/* Footer / Action */}
             <div className="p-5 border-t border-gray-100 bg-white/80 backdrop-blur top-auto bottom-0 sticky">
                 <button
-                    onClick={() => onGenerate(formData)}
+                    onClick={() => onGenerate(isABMode ? { ...formData, variantB: formDataB, isAB: true } : formData)}
                     disabled={loading || !formData.topic}
                     className="btn-primary w-full py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/25 text-sm font-bold tracking-wide disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
                     {loading ? <Zap className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 group-hover:scale-110 transition-transform" />}
-                    {loading ? "Igniting..." : "Generate Content"}
+                    {loading ? "Igniting..." : (isABMode ? "Generate Comparison" : "Generate Content")}
                 </button>
                 {!formData.topic && (
                     <p className="text-[10px] text-center text-gray-400 mt-2 font-medium">Please enter a topic to start</p>

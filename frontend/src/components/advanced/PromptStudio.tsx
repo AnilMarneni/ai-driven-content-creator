@@ -37,7 +37,7 @@ export function PromptStudio({ onUseOverride, initialOverrides, initialTemplateI
     // Fetch Templates
     useEffect(() => {
         if (!isAdvancedMode) return;
-        fetch("http://localhost:8000/prompts/templates")
+        fetch("http://127.0.0.1:8000/prompts/templates")
             .then(res => res.json())
             .then(data => {
                 setTemplates(data);
@@ -80,7 +80,7 @@ export function PromptStudio({ onUseOverride, initialOverrides, initialTemplateI
         if (!selectedTemplate) return;
         setPreviewLoading(true);
         try {
-            const res = await fetch("http://localhost:8000/prompts/preview", {
+            const res = await fetch("http://127.0.0.1:8000/prompts/preview", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

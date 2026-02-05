@@ -25,7 +25,7 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
     useEffect(() => {
         async function fetchModels() {
             try {
-                const res = await fetch("http://localhost:8000/models");
+                const res = await fetch("http://127.0.0.1:8000/models");
                 if (res.ok) {
                     const data = await res.json();
                     setModels(data);

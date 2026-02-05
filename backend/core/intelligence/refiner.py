@@ -57,3 +57,29 @@ def get_suggestions(text: str) -> list[str]:
         return []
     except:
         return ["Could not generate specific suggestions."] # Fallback
+
+def merge_contents(contents: list[str], instruction: str = "") -> str:
+    """
+    Combines multiple text segments into one cohesive piece.
+    """
+    if not contents:
+        return ""
+    
+    combined_input = "\n\n---\n\n".join(contents)
+    
+    prompt = f"""
+    You are an expert editor. Your task is to merge the following separate text segments into one cohesive, well-flowing document.
+    
+    SEGMENTS TO MERGE:
+    {combined_input}
+    
+    INSTRUCTION:
+    {instruction if instruction else "Merge them naturally, ensuring smooth transitions between topics."}
+    
+    RULES:
+    1. Output ONLY the merged text.
+    2. Do not add conversational filler.
+    3. Ensure the tone is consistent throughout.
+    """
+    
+    return generate_text(prompt, model="models/gemini-flash-latest")

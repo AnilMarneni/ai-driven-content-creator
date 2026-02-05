@@ -22,7 +22,7 @@ export default function HistoryPage() {
     const [copiedId, setCopiedId] = useState<number | null>(null);
 
     useEffect(() => {
-        fetch("http://localhost:8000/history")
+        fetch("http://127.0.0.1:8000/history")
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {

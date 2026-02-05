@@ -42,11 +42,12 @@ app.add_middleware(
 
 # ---------- Routes ----------
 # ---------- Routes ----------
-from backend.api.routes import batch, prompts, edit
+from backend.api.routes import batch, prompts, edit, ab_test
 
 app.include_router(batch.router)
 app.include_router(prompts.router)
 app.include_router(edit.router)
+app.include_router(ab_test.router)
 
 
 # ---------- Auth Routes ----------

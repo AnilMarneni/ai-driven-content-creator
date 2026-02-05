@@ -4,13 +4,21 @@ import { useState } from "react";
 import { InputDeck } from "@/components/cockpit/InputDeck";
 import { ContentCanvas } from "@/components/workspace/ContentCanvas";
 import { PromptStudio } from "@/components/advanced/PromptStudio";
+import { BatchUploader } from "@/components/cockpit/BatchUploader";
 
 export default function GeneratePage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
   const [metrics, setMetrics] = useState<any>(null);
+
+  // A/B State
+  const [isAB, setIsAB] = useState(false);
+  const [resultB, setResultB] = useState("");
+  const [metricsB, setMetricsB] = useState<any>(null);
+
   const [error, setError] = useState("");
   const [view, setView] = useState<'canvas' | 'studio'>('canvas');
+  const [mode, setMode] = useState<'single' | 'batch'>('single');
   const [activeOverride, setActiveOverride] = useState<{ templateId: string, overrides: Record<string, string> } | null>(null);
 
   const handleGenerate = async (data: any) => {
@@ -40,13 +48,41 @@ export default function GeneratePage() {
       } else if (data.customPrompt) {
         // Legacy/Simple custom prompt fallback
         payload.prompt_override = { custom_template: data.customPrompt };
+      } else if (data.customPrompt) {
+        // Legacy/Simple custom prompt fallback
+        payload.prompt_override = { custom_template: data.customPrompt };
       }
 
-      const res = await fetch("http://localhost:8000/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      let res;
+      if (data.isAB) {
+        setIsAB(true);
+        // Construct A/B Payload
+        const payloadA = { ...payload };
+        const payloadB = { ...payload, ...data.variantB }; // Overlay B settings
+        // Ensure prompt override logic is also applied to B if needed, 
+        // but for V1 let's assume B just takes standard build unless specified.
+        // If A has override, B might not inherit it unless we explicitly say so.
+        // simpler: just apply model/tone override which are the only ones exposed in UI for B currently.
+
+        const abPayload = {
+          variant_a: payloadA,
+          variant_b: payloadB
+        };
+
+        res = await fetch("http://127.0.0.1:8000/ab/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(abPayload),
+        });
+
+      } else {
+        setIsAB(false);
+        res = await fetch("http://127.0.0.1:8000/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
 
       const responseData = await res.json();
 
@@ -54,8 +90,15 @@ export default function GeneratePage() {
         throw new Error(responseData.detail || "Failed to generate content");
       }
 
-      setResult(responseData.content);
-      setMetrics(responseData.metrics);
+      if (data.isAB) {
+        setResult(responseData.result_a.content);
+        setMetrics(responseData.result_a.metrics);
+        setResultB(responseData.result_b.content);
+        setMetricsB(responseData.result_b.metrics);
+      } else {
+        setResult(responseData.content);
+        setMetrics(responseData.metrics);
+      }
 
       // Auto-switch back to canvas to see result
       if (view === 'studio') setView('canvas');
@@ -68,6 +111,14 @@ export default function GeneratePage() {
     }
   };
 
+  if (mode === 'batch') {
+    return (
+      <div className="h-full w-full bg-slate-50">
+        <BatchUploader onBack={() => setMode('single')} />
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex overflow-hidden bg-gray-50">
 
@@ -78,6 +129,7 @@ export default function GeneratePage() {
           loading={loading}
           onViewChange={setView}
           currentView={view}
+          onSwitchMode={setMode}
         // Optional: activeOverride={activeOverride} to show badge
         />
       </aside>
@@ -98,6 +150,9 @@ export default function GeneratePage() {
             content={result}
             loading={loading}
             metrics={metrics}
+            isAB={isAB}
+            contentB={resultB}
+            metricsB={metricsB}
           />
         )}
       </main>

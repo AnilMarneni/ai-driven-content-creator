@@ -40,8 +40,9 @@ def download_batch_results(job_id: str):
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
         
-    if job["status"] != "completed":
-        raise HTTPException(status_code=400, detail="Job not completed yet")
+    # Allow partial downloads
+    # if job["status"] != "completed":
+    #     raise HTTPException(status_code=400, detail="Job not completed yet")
         
     # Create ZIP in memory
     zip_buffer = io.BytesIO()
