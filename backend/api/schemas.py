@@ -11,6 +11,7 @@ class ContentRequest(BaseModel):
     formality: int = Field(3, ge=1, le=5, example=4)
     include_emojis: bool = Field(True, example=True)
     model: Optional[str] = Field(None, example="models/gemini-1.5-flash")
+    brand_voice_id: Optional[int] = Field(None, example=1)
     prompt_override: Optional[Dict[str, Any]] = Field(None, example={"template_id": "sys_linkedin"})
 
 class ModelSchema(BaseModel):
@@ -77,3 +78,15 @@ class ABContentRequest(BaseModel):
 class ABContentResponse(BaseModel):
     result_a: ContentResponse
     result_b: ContentResponse
+
+class BrandVoiceCreate(BaseModel):
+    name: str = Field(..., min_length=2)
+    description: Optional[str] = ""
+    voice_content: str = Field(..., min_length=10)
+
+class BrandVoiceResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str]
+    voice_content: str
+

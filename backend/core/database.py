@@ -58,6 +58,15 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES users(id)
         )
     ''')
+
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS brand_voices (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT,
+            voice_content TEXT NOT NULL
+        )
+    ''')
     
     conn.commit()
     conn.close()
@@ -184,3 +193,39 @@ def get_recent_generations(limit: int = 20) -> List[Dict[str, Any]]:
     conn.close()
     
     return [dict(row) for row in rows]
+
+# --- Brand Voice Helpers ---
+
+def create_brand_voice(name: str, description: str, voice_content: str) -> int:
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('INSERT INTO brand_voices (name, description, voice_content) VALUES (?, ?, ?)',
+              (name, description, voice_content))
+    conn.commit()
+    voice_id = c.lastrowid
+    conn.close()
+    return voice_id
+
+def get_all_brand_voices() -> List[Dict[str, Any]]:
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('SELECT * FROM brand_voices')
+    rows = c.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+def get_brand_voice_by_id(voice_id: int) -> Optional[Dict[str, Any]]:
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('SELECT * FROM brand_voices WHERE id = ?', (voice_id,))
+    row = c.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def delete_brand_voice(voice_id: int):
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('DELETE FROM brand_voices WHERE id = ?', (voice_id,))
+    conn.commit()
+    conn.close()
+

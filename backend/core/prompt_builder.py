@@ -7,7 +7,8 @@ def build_prompt(
     content_length: str = "Medium",
     keywords: str = "",
     formality: int = 3,
-    include_emojis: bool = True
+    include_emojis: bool = True,
+    brand_voice_id: int = None
 ) -> str:
     """
     Builds a detailed prompt for the LLM based on user inputs.
@@ -16,7 +17,17 @@ def build_prompt(
     # 1. Base Instruction
     prompt = f"Goal: Write a {content_type} about '{topic}'.\n"
     prompt += f"Target Audience: {target_audience}.\n"
-    prompt += f"Tone: {tone}.\n"
+    
+    # Brand Voice Logic
+    if brand_voice_id:
+        from backend.core.database import get_brand_voice_by_id
+        voice = get_brand_voice_by_id(brand_voice_id)
+        if voice:
+            prompt += f"Tone/Style: Copy the style of '{voice['name']}'. Instructions: {voice['voice_content']}.\n"
+        else:
+            prompt += f"Tone: {tone}.\n"
+    else:
+        prompt += f"Tone: {tone}.\n"
 
     # 2. Length Constraints
     word_counts = {

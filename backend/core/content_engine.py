@@ -11,6 +11,7 @@ def generate_content(
     formality: int = 3,
     include_emojis: bool = True,
     model: str = None,
+    brand_voice_id: int = None,
     prompt_override: dict = None # {"template_id": ..., "custom_template": ...}
 ) -> str:
     # 1. Check for overrides
@@ -26,7 +27,8 @@ def generate_content(
             "content_length": content_length,
             "keywords": keywords,
             "formality": formality,
-            "include_emojis": include_emojis
+            "include_emojis": include_emojis,
+            "brand_voice_id": brand_voice_id
         }
         
         # Check for legacy simple override or structured
@@ -57,7 +59,8 @@ def generate_content(
             content_length=content_length,
             keywords=keywords,
             formality=formality,
-            include_emojis=include_emojis
+            include_emojis=include_emojis,
+            brand_voice_id=brand_voice_id
         )
     
     # Generate text using LLM
