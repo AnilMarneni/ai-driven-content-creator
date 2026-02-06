@@ -34,14 +34,31 @@ export function PromptStudio({ onUseOverride, initialOverrides, initialTemplateI
     const [previewText, setPreviewText] = useState("");
     const [previewLoading, setPreviewLoading] = useState(false);
 
-    // Fetch Templates
+    // Fetch Templates & Restore State
     useEffect(() => {
         if (!isAdvancedMode) return;
         fetch("http://127.0.0.1:8000/prompts/templates")
             .then(res => res.json())
             .then(data => {
                 setTemplates(data);
-                // Restore state if available
+
+                // 1. Try to restore from Local Storage first
+                const savedState = localStorage.getItem("prompt_studio_state");
+                if (savedState) {
+                    try {
+                        const parsed = JSON.parse(savedState);
+                        const t = data.find((t: any) => t.id === parsed.templateId);
+                        if (t) {
+                            setSelectedTemplate(t);
+                            setOverrides(parsed.overrides);
+                            return; // Enforce local storage over props if present? Or merge? Strategy: Local Storage wins for continuity.
+                        }
+                    } catch (e) {
+                        console.error("Failed to parse saved state", e);
+                    }
+                }
+
+                // 2. If no local state (or invalid), fall back to props
                 if (initialTemplateId) {
                     const t = data.find((t: any) => t.id === initialTemplateId);
                     if (t) {
@@ -60,7 +77,17 @@ export function PromptStudio({ onUseOverride, initialOverrides, initialTemplateI
                 }
             })
             .catch(err => console.error("Failed to load templates", err));
-    }, [isAdvancedMode, initialTemplateId]);
+    }, [isAdvancedMode, initialTemplateId]); // Keep dependencies simple
+
+    // Save State on Change
+    useEffect(() => {
+        if (selectedTemplate) {
+            localStorage.setItem("prompt_studio_state", JSON.stringify({
+                templateId: selectedTemplate.id,
+                overrides: overrides
+            }));
+        }
+    }, [selectedTemplate, overrides]);
 
     if (!isAdvancedMode) return null;
 

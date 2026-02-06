@@ -14,7 +14,6 @@ interface ContentCanvasProps {
     isAB?: boolean;
     contentB?: string;
     metricsB?: any;
-    metricsB?: any;
     imageUrl?: string;
     keywords?: string;
 }
@@ -232,7 +231,7 @@ export function ContentCanvas({ content, loading, metrics, isAB, contentB, metri
                 )}
                 {/* SEO Panel Sidebar */}
                 {showSEO && (
-                    <div className="absolute top-16 right-0 bottom-0 z-20 animate-slide-in-right">
+                    <div className="absolute top-16 right-0 bottom-0 z-30 animate-slide-in-right">
                         <SEOPanel content={displayContent} keywords={keywords || ""} />
                     </div>
                 )}

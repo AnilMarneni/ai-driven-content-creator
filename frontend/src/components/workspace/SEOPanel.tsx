@@ -57,7 +57,7 @@ export function SEOPanel({ content, keywords, onClose }: SEOAnalysisProps) {
     };
 
     return (
-        <div className="h-full flex flex-col bg-white border-l border-gray-200 shadow-xl w-[320px]">
+        <div className="h-full flex flex-col bg-white border-l border-gray-200 shadow-xl w-full md:w-[320px]">
             {/* Header */}
             <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                 <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
