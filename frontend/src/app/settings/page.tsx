@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Save, Loader2, Settings, User as UserIcon, Camera } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -24,6 +24,36 @@ export default function SettingsPage() {
         industry: "",
         writing_style: ""
     });
+
+    // File Upload State
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [uploading, setUploading] = useState(false);
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        const uploadData = new FormData();
+        uploadData.append("file", file);
+
+        try {
+            const res = await fetch("http://127.0.0.1:8000/upload/avatar", {
+                method: "POST",
+                body: uploadData
+            });
+            if (!res.ok) throw new Error("Upload failed");
+            const data = await res.json();
+
+            setFormData(prev => ({ ...prev, avatar_url: data.url }));
+            setMessage("✅ Avatar uploaded! Save to persist.");
+        } catch (err) {
+            console.error(err);
+            setMessage("❌ Avatar upload failed.");
+        } finally {
+            setUploading(false);
+        }
+    };
 
     useEffect(() => {
         // Sync user data when loaded
@@ -113,30 +143,45 @@ export default function SettingsPage() {
                 {/* Left Col: Profile Card */}
                 <div className="md:col-span-4 space-y-6">
                     <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col items-center text-center">
-                        <div className="relative group cursor-pointer mb-4">
-                            <div className="w-24 h-24 rounded-full bg-gray-100 overflow-hidden ring-4 ring-white shadow-lg">
+                        <div className="relative group cursor-pointer mb-4" onClick={() => fileInputRef.current?.click()}>
+                            <div className="w-24 h-24 rounded-full bg-gray-100 overflow-hidden ring-4 ring-white shadow-lg relative">
                                 <img
                                     src={formData.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.full_name}`}
                                     alt="Profile"
                                     className="w-full h-full object-cover"
                                 />
+                                {uploading && (
+                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                                    </div>
+                                )}
                             </div>
                             <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
                                 <Camera className="w-6 h-6 text-white" />
                             </div>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                className="hidden"
+                                accept="image/*"
+                            />
                         </div>
 
-                        <h2 className="text-xl font-bold text-gray-900">{formData.full_name || "New Creator"}</h2>
-                        <p className="text-sm text-gray-500">{formData.email}</p>
+                        <div className="text-center mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">{formData.full_name || "New Creator"}</h2>
+                            <p className="text-sm text-gray-500">{formData.email}</p>
+                        </div>
 
-                        <div className="w-full mt-6 space-y-4">
+
+                        <div className="w-full space-y-4">
                             <div className="space-y-1 text-left">
                                 <label className="text-xs font-bold text-gray-400 uppercase">Full Name</label>
                                 <div className="relative">
                                     <UserIcon className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
                                     <input
                                         name="full_name"
-                                        value={formData.full_name}
+                                        value={formData.full_name || ""}
                                         onChange={handleChange}
                                         className="w-full pl-9 pr-3 py-2 rounded-lg bg-gray-50 border-none text-sm font-medium focus:ring-2 focus:ring-indigo-100"
                                         placeholder="Your Name"
@@ -148,7 +193,7 @@ export default function SettingsPage() {
                                 <label className="text-xs font-bold text-gray-400 uppercase">Bio / Title</label>
                                 <textarea
                                     name="bio"
-                                    value={formData.bio}
+                                    value={formData.bio || ""}
                                     onChange={handleChange}
                                     className="w-full p-3 rounded-lg bg-gray-50 border-none text-sm focus:ring-2 focus:ring-indigo-100 resize-none h-24"
                                     placeholder="Tell us about yourself..."
@@ -178,7 +223,7 @@ export default function SettingsPage() {
                                 <label className="text-sm font-semibold text-gray-700">Industry / Niche</label>
                                 <input
                                     name="industry"
-                                    value={formData.industry}
+                                    value={formData.industry || ""}
                                     onChange={handleChange}
                                     className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 transition"
                                     placeholder="e.g. SaaS, Fintech"
@@ -188,7 +233,7 @@ export default function SettingsPage() {
                                 <label className="text-sm font-semibold text-gray-700">Writing Style</label>
                                 <input
                                     name="writing_style"
-                                    value={formData.writing_style}
+                                    value={formData.writing_style || ""}
                                     onChange={handleChange}
                                     className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 transition"
                                     placeholder="e.g. Witty, Academic"

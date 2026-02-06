@@ -63,10 +63,10 @@ class UserResponse(BaseModel):
     token: Optional[str] = None # Returned on login/register
 
 class ProfileUpdate(BaseModel):
-    full_name: Optional[str]
-    avatar_url: Optional[str]
-    bio: Optional[str]
-    email: Optional[str]
+    full_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
+    email: Optional[str] = None
 
 
 

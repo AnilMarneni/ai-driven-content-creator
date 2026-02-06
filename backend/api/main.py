@@ -52,6 +52,16 @@ app.include_router(knowledge.router)
 app.include_router(image.router)
 app.include_router(seo.router)
 
+# Mount Static Files
+from fastapi.staticfiles import StaticFiles
+import os
+os.makedirs("backend/static", exist_ok=True)
+app.mount("/static", StaticFiles(directory="backend/static"), name="static")
+
+# Upload Router
+from backend.api.routes import upload
+app.include_router(upload.router)
+
 
 # ---------- Auth Routes ----------
 
