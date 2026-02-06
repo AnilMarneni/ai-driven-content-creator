@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sparkles, Settings2, ChevronDown, ChevronRight, Sliders, Type, Users, Mic, Hash, LayoutTemplate, Zap, FileCode, SplitSquareHorizontal } from "lucide-react";
+import { Sparkles, Settings2, ChevronDown, ChevronRight, Sliders, Type, Users, Mic, Hash, LayoutTemplate, Zap, FileCode, SplitSquareHorizontal, Globe, Image as ImageIcon } from "lucide-react";
 import { ModelSelector } from "@/components/ModelSelector";
 
 import { useAdvancedMode } from "@/context/AdvancedModeContext";
@@ -30,7 +30,10 @@ export function InputDeck({ onGenerate, loading, defaults, onViewChange, current
         formality: 3,
         includeEmojis: true,
         model: "",
-        brandVoiceId: null as number | null // Add brandVoiceId
+        brandVoiceId: null as number | null,
+        language: "English",
+        generateImage: false,
+        imageStyle: "realistic"
     });
 
     const [isABMode, setIsABMode] = useState(false);
@@ -127,6 +130,33 @@ export function InputDeck({ onGenerate, loading, defaults, onViewChange, current
                                 placeholder="e.g. The impact of AI on creative writing..."
                                 className="input-field resize-none h-24 font-medium text-gray-800 leading-relaxed"
                             />
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-medium text-gray-500 mb-1.5 block">Language</label>
+                            <div className="relative">
+                                <Globe className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
+                                <select
+                                    name="language"
+                                    value={formData.language}
+                                    onChange={handleChange}
+                                    className="input-field pl-9 py-2.5 font-medium text-gray-700"
+                                >
+                                    <option>English</option>
+                                    <option>Spanish</option>
+                                    <option>French</option>
+                                    <option>German</option>
+                                    <option>Italian</option>
+                                    <option>Portuguese</option>
+                                    <option>Dutch</option>
+                                    <option>Chinese (Simplified)</option>
+                                    <option>Japanese</option>
+                                    <option>Korean</option>
+                                    <option>Hindi</option>
+                                    <option>Arabic</option>
+                                    <option>Russian</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -250,7 +280,43 @@ export function InputDeck({ onGenerate, loading, defaults, onViewChange, current
                     )}
                 </section>
 
-                {/* 5. Advanced Configuration (Milestone 3.3) */}
+                {/* 5. Visuals (Image Generation) */}
+                <section>
+                    <div className="flex items-center justify-between mb-3">
+                        <label className="text-xs font-bold text-gray-600 flex items-center gap-2">
+                            <ImageIcon className="w-4 h-4 text-pink-500" />
+                            Generate Visual
+                        </label>
+                        <div
+                            onClick={() => setFormData(prev => ({ ...prev, generateImage: !prev.generateImage }))}
+                            className={`w-9 h-5 rounded-full flex items-center p-1 cursor-pointer transition-colors ${formData.generateImage ? 'bg-pink-500' : 'bg-gray-300'}`}
+                        >
+                            <div className={`w-3 h-3 rounded-full bg-white shadow-sm transform transition-transform ${formData.generateImage ? 'translate-x-4' : 'translate-x-0'}`} />
+                        </div>
+                    </div>
+
+                    {formData.generateImage && (
+                        <div className="bg-pink-50/50 p-3 rounded-xl border border-pink-100 animate-slide-up">
+                            <label className="text-[10px] font-bold text-gray-500 mb-1.5 block">Image Style</label>
+                            <div className="grid grid-cols-2 gap-2">
+                                {['Realistic', 'Cartoon', 'Minimalist', 'Painting'].map((style) => (
+                                    <button
+                                        key={style}
+                                        onClick={() => setFormData(prev => ({ ...prev, imageStyle: style.toLowerCase() }))}
+                                        className={`py-2 px-2 text-[10px] font-bold rounded-lg border transition-all ${formData.imageStyle === style.toLowerCase()
+                                            ? 'bg-pink-100 border-pink-300 text-pink-700'
+                                            : 'bg-white border-gray-200 text-gray-500 hover:border-pink-200'
+                                            }`}
+                                    >
+                                        {style}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </section>
+
+                {/* 6. Advanced Configuration (Milestone 3.3) */}
                 <section className="pt-4 border-t border-gray-100 flex items-center justify-between">
                     <ModeToggle />
 

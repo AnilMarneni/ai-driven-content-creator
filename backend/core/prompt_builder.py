@@ -8,14 +8,15 @@ def build_prompt(
     keywords: str = "",
     formality: int = 3,
     include_emojis: bool = True,
-    brand_voice_id: int = None
+    brand_voice_id: int = None,
+    language: str = "English"
 ) -> str:
     """
     Builds a detailed prompt for the LLM based on user inputs.
     """
 
     # 1. Base Instruction
-    prompt = f"Goal: Write a {content_type} about '{topic}'.\n"
+    prompt = f"Goal: Write a {content_type} about '{topic}' in {language}.\n"
     prompt += f"Target Audience: {target_audience}.\n"
     
     # Brand Voice Logic

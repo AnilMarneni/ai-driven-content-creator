@@ -9,6 +9,7 @@ import { BatchUploader } from "@/components/cockpit/BatchUploader";
 export default function GeneratePage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
+  const [imageUrl, setImageUrl] = useState(""); // Image State
   const [metrics, setMetrics] = useState<any>(null);
 
   // A/B State
@@ -20,11 +21,16 @@ export default function GeneratePage() {
   const [view, setView] = useState<'canvas' | 'studio'>('canvas');
   const [mode, setMode] = useState<'single' | 'batch'>('single');
   const [activeOverride, setActiveOverride] = useState<{ templateId: string, overrides: Record<string, string> } | null>(null);
+  const [currentKeywords, setCurrentKeywords] = useState("");
 
   const handleGenerate = async (data: any) => {
     setLoading(true);
     setError("");
+    setLoading(true);
+    setError("");
     setResult("");
+    setImageUrl(""); // Reset image
+    setCurrentKeywords(data.keywords);
 
     try {
       const payload: any = {
@@ -77,11 +83,31 @@ export default function GeneratePage() {
 
       } else {
         setIsAB(false);
-        res = await fetch("http://127.0.0.1:8000/generate", {
+
+        // Parallel execution for Image Gen if requested
+        const textPromise = fetch("http://127.0.0.1:8000/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
+
+        const imagePromise = data.generateImage ? fetch("http://127.0.0.1:8000/generate/image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: `A ${data.imageStyle || 'realistic'} image for a ${data.contentType} about ${data.topic}`,
+            style: data.imageStyle || "realistic",
+            size: "1024x1024"
+          })
+        }) : Promise.resolve(null);
+
+        const [textRes, imageRes] = await Promise.all([textPromise, imagePromise]);
+        res = textRes; // Main response is text for now regarding error handling flow
+
+        if (imageRes && imageRes.ok) {
+          const imgData = await imageRes.json();
+          setImageUrl(imgData.image_url);
+        }
       }
 
       const responseData = await res.json();
@@ -153,6 +179,8 @@ export default function GeneratePage() {
             isAB={isAB}
             contentB={resultB}
             metricsB={metricsB}
+            imageUrl={imageUrl}
+            keywords={currentKeywords}
           />
         )}
       </main>

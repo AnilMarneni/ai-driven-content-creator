@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Copy, Check, FileText, Download, Edit3, Eye, SplitSquareHorizontal, RefreshCw } from "lucide-react";
+import { Copy, Check, FileText, Download, Edit3, Eye, SplitSquareHorizontal, RefreshCw, BarChart2 } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { SmartEditor } from "../editor/SmartEditor";
+import { SEOPanel } from "./SEOPanel";
 
 interface ContentCanvasProps {
     content: string;
@@ -13,12 +14,16 @@ interface ContentCanvasProps {
     isAB?: boolean;
     contentB?: string;
     metricsB?: any;
+    metricsB?: any;
+    imageUrl?: string;
+    keywords?: string;
 }
 
-export function ContentCanvas({ content, loading, metrics, isAB, contentB, metricsB }: ContentCanvasProps) {
+export function ContentCanvas({ content, loading, metrics, isAB, contentB, metricsB, imageUrl, keywords }: ContentCanvasProps) {
     const [activeTab, setActiveTab] = useState<'editor' | 'preview' | 'split'>('editor');
     const [displayContent, setDisplayContent] = useState(content);
     const [copied, setCopied] = useState(false);
+    const [showSEO, setShowSEO] = useState(false);
 
     // Sync content prop changes
     useEffect(() => {
@@ -132,6 +137,14 @@ export function ContentCanvas({ content, loading, metrics, isAB, contentB, metri
                     >
                         <SplitSquareHorizontal className="w-3.5 h-3.5" /> Split
                     </button>
+                    <div className="h-4 w-[1px] bg-gray-300 mx-1"></div>
+                    <button
+                        onClick={() => setShowSEO(!showSEO)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${showSEO ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'text-gray-500 hover:text-gray-900 border border-transparent'
+                            }`}
+                    >
+                        <BarChart2 className="w-3.5 h-3.5" /> SEO
+                    </button>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -146,6 +159,23 @@ export function ContentCanvas({ content, loading, metrics, isAB, contentB, metri
 
             {/* Content Area */}
             <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+
+                {/* Generated Image Display */}
+                {imageUrl && (
+                    <div className="max-w-6xl mx-auto mb-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-2 animate-fade-in relative group">
+                        <img
+                            src={imageUrl}
+                            alt="Generated Content Visual"
+                            className="w-full h-64 object-cover rounded-xl"
+                        />
+                        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                            <button className="bg-white/90 p-2 rounded-lg text-gray-700 hover:text-pink-600 shadow-sm border border-white/20 backdrop-blur-sm">
+                                <Download className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 min-h-[calc(100vh-200px)] p-8 md:p-12 relative">
                     {activeTab === 'editor' && (
                         <SmartEditor
@@ -200,6 +230,13 @@ export function ContentCanvas({ content, loading, metrics, isAB, contentB, metri
                         </div>
                     </div>
                 )}
+                {/* SEO Panel Sidebar */}
+                {showSEO && (
+                    <div className="absolute top-16 right-0 bottom-0 z-20 animate-slide-in-right">
+                        <SEOPanel content={displayContent} keywords={keywords || ""} />
+                    </div>
+                )}
+
             </div>
         </div>
     );
