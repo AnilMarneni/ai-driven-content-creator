@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sparkles, LayoutGrid, History, Settings, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { ThemeToggle } from "./ThemeToggle";
 import { useState } from "react";
 
 export function Navbar() {
@@ -39,8 +40,8 @@ export function Navbar() {
               key={item.href}
               href={item.href}
               className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all duration-200 ${isActive
-                  ? "bg-white text-primary shadow-sm"
-                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-200/50"
+                ? "bg-white text-primary shadow-sm"
+                : "text-gray-500 hover:text-gray-900 hover:bg-gray-200/50"
                 }`}
             >
               <item.icon className={`w-4 h-4 ${isActive ? "fill-primary/20" : ""}`} />
@@ -52,6 +53,7 @@ export function Navbar() {
 
       {/* Right Actions */}
       <div className="flex items-center gap-4">
+        <ThemeToggle />
         {/* Credits Pill (Mock) */}
         <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>

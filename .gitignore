@@ -3,3 +3,10 @@ venv/
 __pycache__/
 *.pyc
 .DS_Store
+node_modules/
+dist/
+build/
+.next/
+.vscode/
+.idea/
+*.log
